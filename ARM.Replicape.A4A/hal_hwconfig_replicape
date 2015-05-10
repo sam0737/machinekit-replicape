@@ -22,6 +22,8 @@ The following pins are exported
 * stepper.x.current
   Current settings for steppers 0 to 5.
   Value is treated as current in Amps
+* watchdog
+  A pin that toggles at every loop informing HAL that this component is alive
 
 Copyright (C) 2013 Sam Wong
 GNU GPL Version 2.0 or (at your option) any later version
@@ -78,6 +80,7 @@ for i in range(0,N):
     microsteppingPins[i] = h.newparam(("stepper.%d.microstepping" % i), hal.HAL_U32, hal.HAL_RW)
     decayPins[i] = h.newparam(("stepper.%d.decay" % i), hal.HAL_BIT, hal.HAL_RW)
     currentPins[i] = h.newparam(("stepper.%d.current" % i), hal.HAL_FLOAT, hal.HAL_RW)
+halWatchdogPin = h.newpin("watchdog", hal.HAL_BIT, hal.HAL_OUT)
 h.ready()
 
 '''
@@ -135,9 +138,11 @@ def turnOff():
     # Reverse the writting orders due to serial chain sequence
     spi2_1.write(bytes[::-1]) 
 
+watchdog = True
 try:
     oldEnable = False
     reset()
+    time.sleep(0.05)
     while (True):
         enable = enablePin.value
         if (enable and not oldEnable):
@@ -146,6 +151,8 @@ try:
             turnOff()
         oldEnable = enable
 
+        watchdog = not watchdog
+        halWatchdogPin.value = watchdog
         time.sleep(0.05)
 except BaseException as e:
     reset()

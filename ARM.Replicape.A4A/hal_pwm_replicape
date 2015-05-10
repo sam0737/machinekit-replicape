@@ -12,6 +12,8 @@ The following pins are exported
   Enable the PWM
 * out.x
   PWM output for channel 0 to 15. Values are from 0.0 to 1.0
+* watchdog
+  A pin that toggles at every loop informing HAL that this component is alive
 
 Copyright (C) 2013 Sam Wong
 GNU GPL Version 2.0 or (at your option) any later version
@@ -77,6 +79,7 @@ if (not args.debug):
     # Initialize HAL
     h = hal.component(args.name)
     enablePin = h.newpin("enable", hal.HAL_BIT, hal.HAL_IN)
+    halWatchdogPin = h.newpin("watchdog", hal.HAL_BIT, hal.HAL_OUT)
     outPins = [None] * N
     onPins = [None] * N
     oldOutputs = [0] * N
@@ -102,9 +105,11 @@ def commit():
             bytes = [0x00, 0x00, off & 0xFF, off >> 8]
             bus.write_i2c_block_data(PCA9685_ADDR, 0x06 + (4 * i), bytes)
 
+watchdog = True
 try:
     oldEnable = False
     while (True):
+	watchdog = not watchdog
         enable = enablePin.value
         if (enable):
             commit()
@@ -112,6 +117,7 @@ try:
             turnOff()
         oldEnable = enable
 
+        halWatchdogPin.value = watchdog
         time.sleep(0.05)
 except BaseException as e:
     turnOff()
