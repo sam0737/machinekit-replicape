@@ -36,10 +36,10 @@ Prerequisite
   * If you have the Ethernet connected, check what dynamic IP got assigned to the BBB
   * The default user and password is ```machinekit``` and ```machinekit```
   * One might want to change the password, optionally create a new user, and configuring SSH pubkey authorization for easier maintainence, and changing the hostname.
-* Upgrading to kernel 4.4 (The instructions is not tested for other kernel)
+* Upgrading to kernel (The instructions is only tested on 4.8.*)
 ```
 cd /opt/scripts/tools
-sudo ./update_kernel.sh --lts-4_4 --bone-rt-channel
+sudo ./update_kernel.sh --stable --bone-rt-channel
 reboot
 ```
 * Install the Device Tree Overlays (such that the Replicape can be recognized)
@@ -80,19 +80,37 @@ dmesg | less
 ```
 * Install the following python modules, which are used in the HAL
 ```
-pip install spi smbus
+sudo pip install spi smbus 
 ```
-* Clone this repository for the RS274 subroutines and HAL files
+* Install Machinekit -rt-preempt Realtime component (Since xenomai is not used), and -dev for compiling icomp
+```
+sudo apt install machinekit-rt-preempt machinekit-dev
+```
+* Modify the dev environment as follow
+```
+sudo vim /usr/share/linuxcnc/Makefile.inc
+
+3 lines to edit:
+BUILD_THREAD_FLAVORS=rt-preempt
+...
+HAVE_POSIX_THREADS=no
+HAVE_RT_PREEMPT_THREADS=yes
+```
+* Clone this repository for the machinekit configuration
 ```
 # Do this non-root is highly recommended
 cd ~
 git clone https://github.com/sam0737/machinekit-replicape
 ```
-* Clone the Machineface
+* Clone the Machineface under user home directory
 ```
 # Do this non-root is highly recommended
 cd ~
 git clone https://github.com/machinekoder/Machineface
+```
+* Enable Machinekit from accepting remote connection
+```
+Edit /etc/linuxcnc/machinekit.ini, change REMOTE to 1
 ```
 
 ### Others
@@ -100,17 +118,22 @@ git clone https://github.com/machinekoder/Machineface
 * Slicer: Slic3r 1.2.9 is needed. Only since that version velocity extrusion is supported. Other slicers are not tested.
 * Get a machinekit client on the host computer at https://github.com/strahlex/MachinekitClient/
 
-Usage
------
+Integration
+-----------
 
-* In run.py, 
-  * Change the Video Streaming path accordingly
-  * Change the Machineface path accordingly
-* Refer to the RS274 subroutines in replicape.ini
+* Go through ARM.Replicape.B3/replicape.ini and customize the settings accordingly.
 * Slic3r configuration, under Printer Settings:
   * use firmware retraction + velocity extrusion
   * Put ```M200 D[filament_diameter]``` in Start G-code in Slic3r
-* Be sure to go through the HAL, INI. The scaling, endstops, kins, stepper connections, fans, microsteppings, etc.
+
+Usage
+-----
+
+* Run mklauncher at the repository root
+```
+mklauncher -d .
+```
+* Run Machinekit client. The printer should be discoverable.
 
 Lincese
 -------
