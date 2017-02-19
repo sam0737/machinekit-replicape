@@ -2,3 +2,5 @@
 *.pyc
 *.bak
 rs274ngc.var
+local
+tool.tbl

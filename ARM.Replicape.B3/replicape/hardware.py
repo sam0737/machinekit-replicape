@@ -167,21 +167,19 @@ class ReplicapeB3A(Replicape):
         return [self.hwconfig.pin('watchdog'), self.pwm.pin('watchdog')]
 
     def get_limit_pin(self, axis, is_max):
-        if axis == 'X' and not is_max: return self.get_gpio_pin('p9.in-25')
-        if axis == 'X' and is_max: return self.get_gpio_pin('p9.in-11')
-        if axis == 'Y' and not is_max: return self.get_gpio_pin('p9.in-23')
-        if axis == 'Y' and is_max: return self.get_gpio_pin('p9.in-28')
-        if axis == 'Z' and not is_max: return self.get_gpio_pin('p9.in-13')
-        if axis == 'Z' and is_max: return self.get_gpio_pin('p9.in-18')
+        # Return END_STOP_*_1 pins in all sistuations
+        if axis == 'X': return self.get_gpio_pin('p9.in-25')
+        if axis == 'Y': return self.get_gpio_pin('p9.in-23')
+        if axis == 'Z': return self.get_gpio_pin('p9.in-13')
         raise NotImplementedError()
 
     def get_fan_pwm_pin(self, index):
-        if index < 0 or index > 4:
+        if index < 0 or index > 3:
             raise ValueError('index must be 0 to 3')
         return self.pwm.pin('%i.out' % (index + 7))
 
     def get_fan_on_pin(self, index):
-        if index < 0 or index > 4:
+        if index < 0 or index > 3:
             raise ValueError('index must be 0 to 3')
         return self.pwm.pin('%i.on' % (index + 7))
 
@@ -238,10 +236,12 @@ class ReplicapeA4A(Replicape):
         return [self.hwconfig.pin('watchdog'), self.pwm.pin('watchdog'), self.dac.pin('watchdog')]
 
     def get_limit_pin(self, axis, is_max):
-        # Return END_STOP_*_1 pins in all sistuations
-        if axis == 'X': return self.get_gpio_pin('p9.in-25')
-        if axis == 'Y': return self.get_gpio_pin('p9.in-23')
-        if axis == 'Z': return self.get_gpio_pin('p9.in-13')
+        if axis == 'X' and not is_max: return self.get_gpio_pin('p9.in-25')
+        if axis == 'X' and is_max: return self.get_gpio_pin('p9.in-11')
+        if axis == 'Y' and not is_max: return self.get_gpio_pin('p9.in-23')
+        if axis == 'Y' and is_max: return self.get_gpio_pin('p9.in-16')
+        if axis == 'Z' and not is_max: return self.get_gpio_pin('p9.in-13')
+        if axis == 'Z' and is_max: return self.get_gpio_pin('p9.in-18')
         raise NotImplementedError()
 
     def get_fan_pwm_pin(self, index):

@@ -15,7 +15,7 @@ SERVO_THREAD = 'servo-thread'
 BOARD_REV = ''
 AXIS_TOTAL = 0
 EXTRUDER_TOTAL = 1
-DEFAULT_CURRENT = '0.5'
+DEFAULT_CURRENT = 0.5
 
 def check_version():
     global BOARD_REV
@@ -226,13 +226,13 @@ def setup_extruders(replicape, extruder_sel_sig):
     comp_params.ready()
 
 def setup_system_fan(replicape):
-    en = config.find('FDM','SYSTEM_FAN')
-    if en is None or int(en) == 0:
+    en = config.find('FDM','SYSTEM_FAN', 0)
+    if int(en) == 0:
         return
 
     fan_sig = hal.newsig('fan-output', hal.HAL_FLOAT)
-    fan_sig.set(1)
     replicape.get_fan_pwm_pin(3).link(fan_sig)
+    fan_sig.set(1.0)
 
 def setup_limit_switches(replicape):
     limit_x_sig = hal.newsig('limit-x', hal.HAL_BIT)
@@ -309,6 +309,14 @@ def setup_estop(error_sigs, watchdog_sigs, estop_reset, thread):
         orn.pin('out').link(estop_fault)
         estop_latch.pin('fault-in').link(estop_fault)
 
+def connect_tool_changer():
+    p = hal.Signal('tool-prepared', hal.HAL_BIT)
+    p.link('iocontrol.0.tool-prepare')
+    p.link('iocontrol.0.tool-prepared')
+    c = hal.Signal('tool-changed', hal.HAL_BIT)
+    c.link('iocontrol.0.tool-change')
+    c.link('iocontrol.0.tool-changed')
+
 def init_hardware():
     check_version()
 
@@ -370,5 +378,6 @@ def init_hardware():
     setup_system_fan(replicape)
 
     setup_estop(error_sigs, watchdog_sigs, estop_reset, SERVO_THREAD)
+    connect_tool_changer()
 
 

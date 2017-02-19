@@ -1,0 +1,32 @@
+*** Analog Output
+
+| #         | Name                           |
+|-----------+--------------------------------|
+| 0         | HBP target temperature         |
+| 1         | HBC target temperature         |
+| 2 - 11    | E0-E9 target temperature       |
+| 41        | VE line cross section        |
+| 44        | VE filament diameter         |
+
+*** Analog Input
+
+| #         | Name                         |
+|-----------+------------------------------|
+| 0         | HBP measured temperature     |
+| 1         | HBC measured temperature     |
+| 2 - 11    | E0-E9 measured temperature   |
+
+
+*** Digital Output
+
+|  # | Name                  |
+|----+-----------------------|
+|  1 | Extruder enable       |
+
+*** Digital Input
+
+|      # | Name                       |
+|--------+----------------------------|
+|      0 | HBP temperature in range   |
+|      1 | HBC temperature in range   |
+| 2 - 11 | E0-E9 temperature in range |

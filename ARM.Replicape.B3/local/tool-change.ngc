@@ -1,0 +1,51 @@
+O<tool-change> SUB
+
+#<_ToolStandbyY> = 215
+#<_ToolUnmountY> = 256
+#<_ToolMountY>   = 261.5
+#<_ToolX1>       = 182
+#<_ToolX2>       = 10
+
+
+M70             ( save state )
+
+G90             ( absolute mode )
+G40             ( compensation off )
+
+O200 if [#<_current_tool> EQ 1]
+  #<_ToolX> = #<_ToolX1>
+O200 elseif [#<_current_tool> EQ 2]
+  #<_ToolX> = #<_ToolX2>
+O200 endif
+
+O201 if [#<_current_tool> GT 0]
+  G53 G0 Y[#<_ToolStandbyY>]
+  G53 G0 X[#<_ToolX>]
+  G53 G1 Y[#<_ToolUnmountY>] F6000
+  G53 G1 Y[#<_ToolStandbyY>]
+O201 endif
+
+M6
+
+O300 if [#<_current_tool> EQ 1]
+  #<_ToolX> = #<_ToolX1>
+O300 elseif [#<_current_tool> EQ 2]
+  #<_ToolX> = #<_ToolX2>
+O300 endif
+
+O301 if [#<_current_tool> GT 0]
+  G53 G0 Y[#<_ToolStandbyY>]
+  G53 G0 X[#<_ToolX>]
+  G53 G1 Y[#<_ToolMountY>] F6000
+  G53 G1 X[#<_ToolX>+6.8]
+  G53 G1 Y[#<_ToolStandbyY>]
+O301 endif
+
+G91             ( relative mode )
+G0 Z0           ( activate tool length offset )
+G90
+
+M72             ( restore state )
+G43             ( load tool offset )
+
+O<tool-change> ENDSUB
