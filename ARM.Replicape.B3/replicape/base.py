@@ -137,6 +137,7 @@ def setup_extruder(replicape, extruder, nr):
 
     for port in ports:
         sg = replicape.get_stepgen(port)
+        replicape.get_pru_pin('%s.control-type' % (sg)).set(1)
         replicape.get_pru_pin('%s.velocity-cmd' % (sg)).link(extruder.extrude_vel_sig)
         replicape.get_pru_pin('%s.position-scale' % (sg)) \
             .set(float(
