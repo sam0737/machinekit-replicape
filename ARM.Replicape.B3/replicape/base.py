@@ -266,6 +266,12 @@ def setup_limit_switches(replicape):
         replicape.get_limit_pin('Z', True).link(limit_z_sig)
         limit_z_sig.link('axis.2.pos-lim-sw-in')
 
+    probe_pin = replicape.get_probe_pin();
+    if probe_pin is not None:
+        probe_sig = hal.newsig('limit-probe', hal.HAL_BIT)
+        probe_sig.link(probe_pin)
+        probe_sig.link('motion.probe-input')
+
 def setup_estop(error_sigs, watchdog_sigs, estop_reset, thread):
     # Create estop signal chain
     estop_user = hal.Signal('estop-user', hal.HAL_BIT)

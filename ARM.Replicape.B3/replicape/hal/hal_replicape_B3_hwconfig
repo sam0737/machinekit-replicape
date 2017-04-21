@@ -72,9 +72,9 @@ D0  = (0) EN_XYZ            = 1 (Disable)
       (2) SERVO_1_EN        = 0 (Disable)
       (3) EN_Extruders      = 1 (Disable)
       (4) Stepper_Tristate  = 1 (Tied)
-D1  = CFG5 = 0 (Chopper blank time)
-D2  = CFG4 = 0 (Chopper hysteresis)
-D3  = CFG0 = 0 (Chopper off time)
+D1  = CFG5 = 0 (Chopper blank time: 0=16 cycles, 1=24 cycles)
+D2  = CFG4 = 0 (Chopper hysteresis: 0=5, 1=9)
+D3  = CFG0 = 0 (Chopper off time: 0=140 cycles, 1=236 cycles)
 D4  = CFG2 = 0
 D5  = CFG2_Tristate = 0 (Hi-Z)
 D6  = CFG1 = 0
@@ -87,10 +87,26 @@ def commit():
     # Writing the modes
     bytes = []
     for i in range(0,N):
-        # State:
-        #   0x80: CFG2=Z, CFG1=0 - 16ustep, spreadCycle
-        #   0x00: CFG2=Z, CFG1=Z - 16ustep, stealthChop
-        state = 128 if modePins[i].value > 0 else 0
+        # State:  CFG2 CFG1 Microsteps
+        #                      Interpolation
+        #                        Chopper Mode
+        #   0x0*: open open 16 Y stealthChop
+        #   0x1*: open open 16 Y stealthChop
+        #   0x2*: GND  open 2  Y spreadCycle
+        #   0x3*: VCC  open 4  Y spreadCycle
+        #   0x4*: open open 16 Y stealthChop
+        #   0x5*: open open 16 Y stealthChop
+        #   0x6*: GND  open 2  Y spreadCycle
+        #   0x7*: VCC  open 4  Y spreadCycle
+        #   0x8*: open GND  16 Y spreadCycle
+        #   0x9*: open GND  16 Y stealthChop
+        #   0xA*: GND  GND  1  N spreadCycle
+        #   0xB*: VCC  GND  4  N spreadCycle
+        #   0xC*: open VCC  4  Y stealthChop
+        #   0xD*: open VCC  4  Y stealthChop
+        #   0xE*: GND  VCC  2  N spreadCycle
+        #   0xF*: VCC  VCC  16 N spreadCycle
+        state = modePins[i].value & 0xFE
         if (i == 0 or i == 3) and not enablePin.value:
             state = state | 1
         if (i == 4):

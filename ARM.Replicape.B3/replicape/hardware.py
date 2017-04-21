@@ -107,6 +107,9 @@ class Replicape(object):
     def get_limit_pin(self, axis, is_max):
         raise NotImplementedError()
 
+    def get_probe_pin(self):
+        raise NotImplementedError()
+
     def get_fan_pwm_pin(self, index):
         raise NotImplementedError()
 
@@ -144,7 +147,8 @@ class ReplicapeB3A(Replicape):
             wait_name='replicape_hwconfig')
 
         for i in xrange(5):
-            self.hwconfig.pin('stepper.%i.mode' % i).set(1) # spreadMode, microstepping=1/16
+            # Default: spreadMode, microstepping=1/16
+            self.hwconfig.pin('stepper.%i.mode' % i).set(config.find('FDM','STEPPER_%i_MODE' % i, 0x80))
 
         super(ReplicapeB3A, self).__init__()
 
@@ -172,6 +176,9 @@ class ReplicapeB3A(Replicape):
         if axis == 'Y': return self.get_gpio_pin('p9.in-23')
         if axis == 'Z': return self.get_gpio_pin('p9.in-13')
         raise NotImplementedError()
+
+    def get_probe_pin(self):
+        return self.get_gpio_pin('p9.in-18')
 
     def get_fan_pwm_pin(self, index):
         if index < 0 or index > 3:
@@ -204,6 +211,7 @@ class ReplicapeA4A(Replicape):
         self.gpio = rtapi.loadrt('hal_bb_gpio', 
             output_pins='', 
             input_pins='810,809,924,818,923,925,916,918,911,913')
+
         self.dac = hal.loadusr(USR_HAL_PATH + 'hal_replicape_dac',
             name='replicape_dac',
             wait_name='replicape_dac')
@@ -213,8 +221,9 @@ class ReplicapeA4A(Replicape):
             wait_name='replicape_hwconfig')
 
         for i in xrange(5):
-            self.hwconfig.pin('stepper.%i.microstepping' % i).set(5) # microstepping=1/32
-            self.hwconfig.pin('stepper.%i.decay' % i).set(0) # Fast decay
+            # Default: microstepping=1/32, fast decay
+            self.hwconfig.pin('stepper.%i.microstepping' % i).set(config.find('FDM','STEPPER_%i_MICROSTEPPING' % i, 5))
+            self.hwconfig.pin('stepper.%i.decay' % i).set(config.find('FDM','STEPPER_%i_DECAY' % i, 0))
 
         super(ReplicapeA4A, self).__init__()
 
@@ -243,6 +252,9 @@ class ReplicapeA4A(Replicape):
         if axis == 'Z' and not is_max: return self.get_gpio_pin('p9.in-13')
         if axis == 'Z' and is_max: return self.get_gpio_pin('p9.in-18')
         raise NotImplementedError()
+
+    def get_probe_pin(self):
+        return None
 
     def get_fan_pwm_pin(self, index):
         if index == 3 or index == 4: return self.pwm.pin('%i.out' % (index - 3 + 14))
