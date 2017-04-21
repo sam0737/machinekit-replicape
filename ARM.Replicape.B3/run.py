@@ -30,6 +30,7 @@ try:
     launcher.install_comp('replicape/thermistor_check.icomp')
     launcher.install_comp('replicape/io_muxn_bit.icomp')
     launcher.install_comp('replicape/muxn_bit.icomp')
+    launcher.install_comp('replicape/reset.icomp')
     # Video Streaming: you might need to create your own config
     # launcher.start_process("videoserver --ini ~/video.ini Webcam1")
     # Remote Control: Get a Machineface at ARM.Replicape.A4A.vel/
