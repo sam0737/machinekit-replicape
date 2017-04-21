@@ -121,7 +121,7 @@ def reset():
     # Writing the modes
     bytes = []
     for i in range(0,N):
-        state = modePins[i].value << 4
+        state = modePins[i].value & 0xFE
         if (i == 0 or i == 3):
             state = state | 1
         if (i == 4):
